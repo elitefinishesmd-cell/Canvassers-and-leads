@@ -1,33 +1,11 @@
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 const express = require('express');
-const session = require('express-session');
 const path = require('path');
+const app = require('./app');
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- Middleware ---
-app.use(express.json());
-
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'elite-finishes-dev-secret-change-me',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    httpOnly: true,
-    sameSite: 'lax'
-  }
-}));
-
-// --- API Routes ---
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/leads', require('./routes/leads'));
-app.use('/api/appointments', require('./routes/appointments'));
-app.use('/api/stats', require('./routes/stats'));
-app.use('/api/users', require('./routes/users'));
-
-// --- Serve frontend in production ---
+// --- Serve frontend in production (local only, Vercel handles this itself) ---
 const publicDir = path.join(__dirname, 'public');
 app.use(express.static(publicDir));
 app.get('*', (req, res) => {

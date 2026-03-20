@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { supabase } = require('../supabase');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, signToken, setTokenCookie, clearTokenCookie } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -27,17 +27,15 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
-  req.session.userId = user.id;
-  req.session.save(() => {
-    res.json({ id: user.id, name: user.name, role: user.role });
-  });
+  const token = signToken(user.id);
+  setTokenCookie(res, token);
+  res.json({ id: user.id, name: user.name, role: user.role });
 });
 
 // POST /api/auth/logout
 router.post('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.json({ ok: true });
-  });
+  clearTokenCookie(res);
+  res.json({ ok: true });
 });
 
 // GET /api/auth/me
